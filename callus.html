@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Call Me</title>
+    <link rel="stylesheet" href="build/css/demo.css" />
+    <link rel="stylesheet" href="build/css/intlTelInput.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+      /* custom font */
+      .roboto-light {
+        font-family: "Roboto", sans-serif;
+        font-weight: 300;
+        font-style: normal;
+      }
+
+      .roboto-regular {
+        font-family: "Roboto", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      .roboto-bold {
+        font-family: "Roboto", sans-serif;
+        font-weight: 700;
+        font-style: normal;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .callbot-toggler {
+        position: fixed;
+        bottom: 30px;
+        right: 35px;
+        outline: none;
+        border: none;
+        height: 50px;
+        width: 50px;
+        display: flex;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #4caf50;
+        transition: all 0.2s ease;
+      }
+      body.show-callbot .callbot-toggler {
+        transform: rotate(90deg);
+      }
+      .callbot-toggler span {
+        color: #fff;
+        position: absolute;
+      }
+      .callbot-toggler span:last-child,
+      body.show-callbot .callbot-toggler span:first-child {
+        opacity: 0;
+      }
+      body.show-callbot .callbot-toggler span:last-child {
+        opacity: 1;
+      }
+      .callbot {
+        position: fixed;
+        right: 35px;
+        bottom: 90px;
+        width: 245px;
+        background: #fff;
+        border-radius: 15px;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.5);
+        transform-origin: bottom right;
+        box-shadow: 0 0 128px 0 rgba(0, 0, 0, 0.1),
+          0 32px 64px -48px rgba(0, 0, 0, 0.5);
+        transition: all 0.1s ease;
+      }
+
+      body.show-callbot .callbot {
+        opacity: 1;
+        pointer-events: auto;
+        transform: scale(1);
+      }
+      .callbot header {
+        padding: 16px 0;
+        position: relative;
+        text-align: center;
+        color: #fff;
+        background: darkgreen;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .callbot header span {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        display: none;
+        cursor: pointer;
+        transform: translateY(-50%);
+      }
+      header h2 {
+        font-size: 1.4rem;
+      }
+      .callbot .chatbox {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        padding: 40px 15px;
+      }
+      .callbot :where(.chatbox, textarea)::-webkit-scrollbar {
+        width: 6px;
+      }
+      .callbot :where(.chatbox, textarea)::-webkit-scrollbar-track {
+        background: #fff;
+        border-radius: 25px;
+      }
+      .callbot :where(.chatbox, textarea)::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 25px;
+      }
+      .chatbox .chat {
+        display: flex;
+        list-style: none;
+      }
+      .chatbox .outgoing {
+        margin: 20px 0;
+        justify-content: flex-end;
+      }
+      .chatbox .incoming span {
+        width: 32px;
+        height: 32px;
+        color: #fff;
+        cursor: default;
+        text-align: center;
+        line-height: 32px;
+        align-self: flex-end;
+        background: #4caf50;
+        border-radius: 4px;
+        margin: 0 10px 7px 0;
+      }
+      .chatbox .chat p {
+        white-space: pre-wrap;
+        padding: 12px 16px;
+        border-radius: 10px 10px 0 10px;
+        max-width: 75%;
+        color: #fff;
+        font-size: 0.95rem;
+        background: #4caf50;
+      }
+      .chatbox .incoming p {
+        border-radius: 10px 10px 10px 0;
+      }
+      .chatbox .chat p.error {
+        color: #721c24;
+        background: #f8d7da;
+      }
+      .chatbox .incoming p {
+        color: #000;
+        background: #f2f2f2;
+      }
+
+      .callbot .action-buttons {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      /* CSS styles for flags dropdown */
+      .intl-tel-input.allow-dropdown .selected-flag {
+        width: 40px;
+      }
+
+      .callbot .action-buttons button {
+        margin: 0 10px;
+        padding: 10px 20px;
+        font-size: 1rem;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        background-color: darkgreen;
+        color: #fff;
+        transition: background-color 0.3s;
+      }
+
+      .callbot .action-buttons button:hover {
+        background-color: darkgreen;
+      }
+
+      .callform {
+        padding: 40px 15px;
+      }
+
+      .callform::after {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        border-radius: 50px;
+        z-index: -1;
+        border: 10px solid transparent;
+        border-image: linear-gradient(to left, #00c853, #b2ff59) 1;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-weight: bold;
+        color: black;
+        font-size: 3vh;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      input[type="tel"] {
+        flex: 1;
+        margin-bottom: 10px;
+        padding: 10px;
+        font-size: 20px;
+        border-radius: 10px;
+      }
+
+      button[type="submit"] {
+        width: 160px;
+        background-color: darkgreen;
+        color: white;
+        border-radius: 10px;
+        font-size: 18px;
+        text-align: center;
+      }
+
+      p {
+        text-align: center;
+        font-size: 10px;
+        margin-top: 20px;
+      }
+
+      h5 {
+        text-align: center;
+        color: black;
+        margin-bottom: 7px;
+        font-size: 2vh;
+      }
+
+      .trigger-popup-btn {
+        margin-left: 0px;
+        width: 100%;
+        background-color: darkgreen;
+      }
+
+      .take-number input {
+        width: 180px;
+        margin-bottom: 10px;
+        margin-left: 0px;
+        font-size: 13px;
+      }
+
+      .privacy-policy-class {
+        margin: 0px;
+        font-size: 2rm;
+      }
+
+      .call-me-btn button {
+        padding: 0px;
+        margin: 10px 0px;
+      }
+
+      .privacy-policy-class a {
+        color: #000;
+      }
+      .chatbox3 {
+        padding-top: 20px;
+      }
+      body{
+        background-color: #fff;
+      }
+
+    .talk-with-me-btn {
+        background-color: transparent;
+        border: none;
+        outline: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        color: #fff;
+        cursor: pointer;
+        border-top-right-radius: 30px;
+        border-bottom-right-radius: 30px;
+        position: relative;
+        overflow: hidden;
+        transition: border-radius 0.3s ease-in-out;
+    }
+
+    .talk-with-me-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to right, #4caf50, #00c853);
+        z-index: -1;
+        transition: transform 0.3s ease-in-out;
+        border-radius: 30px;
+    }
+
+    .talk-with-me-btn:hover {
+        border-top-left-radius: 30px;
+        border-bottom-left-radius: 30px;
+        color: #fff; /* Ensure color stays white on hover */
+    }
+
+    </style>
+  </head>
+  <body>
+    <button class="talk-with-me-btn">Talk with me</button>
+    <button class="callbot-toggler">
+      <span class="material-symbols-rounded">call</span>
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <div class="callbot">
+      <header>
+        <h2>Call Me</h2>
+        <span class="close-btn material-symbols-outlined">close</span>
+      </header>
+
+      <!-- chatbox1 stage 1 -->
+      <div class="chatbox chatbox1" id="step1">
+        <h5>
+          Need Help? <br />
+          Get a Free Call and Speak to our assistant
+        </h5>
+        <!-- Button to trigger the popup -->
+        <button id="open-popup" class="trigger-popup-btn">Yes</button>
+        <!-- Popup overlay -->
+
+        <div class="popup-overlay" id="popup-overlay"></div>
+      </div>
+      <!-- Popup container -->
+      <!-- chatbox2 stage 2 -->
+      <div
+        class="chatbox chatbox2 popup-container callform border-gradient border-gradient-green"
+        id="popup-container"
+      >
+        <div id="step2">
+          <h1 class="roboto-bold">
+            Get a Callback<br />
+            from our Assistant
+          </h1>
+          <!-- Form will be loaded here -->
+          <form id="popup-form">
+            <!-- Input field for phone number with intlTelInput class -->
+            <div class="take-number">
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                required
+                placeholder="Phone Number"
+                class="intl-tel-input"
+              />
+            </div>
+            <!-- Button for form submission -->
+            <div class="call-me-btn" id="call-now">
+              <button type="submit">Call me now</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- chatbox 3 -->
+      <div class="chatbox3">
+        <h1 id="step3"></h1>
+      </div>
+
+      <!-- privacy-policy -->
+      <footer>
+        <p class="roboto-light privacy-policy-class" id="privacy-policy">
+          The administrator of data you enter here will be us; that is: GenCalll
+          (Withness LTD).
+          <span id="show-more" style="display: none">
+            Data will be processed for direct marketing purposes of our products
+            and services. We will never sell your data to 3rd parties.</span
+          >
+          <a href="#" id="toggle-show-more-less">Show More...</a>
+        </p>
+      </footer>
+    </div>
+
+    <!-- Script for intlTelInput library -->
+    <script src="build/js/intlTelInput.js"></script>
+    <script>
+      var input = document.querySelector("#phone");
+      var iti = window.intlTelInput(input, {
+        initialCountry: "us", // Set initial country to USA
+        separateDialCode: true, // Display country dial code separately
+        utilsScript: "js/utils.js", // Path to the utils.js file
+        dropdownContainer: document.body, // Append dropdown to body
+        allowDropdown: true, // Allow dropdown for selecting more countries
+      });
+
+      // Listen for country change event
+      input.addEventListener("countrychange", function () {
+        var selectedCountryData = iti.getSelectedCountryData();
+        var countryCode = "+" + selectedCountryData.dialCode;
+        // Update the input value with the country code
+        input.value = countryCode;
+      });
+    </script>
+
+    <script>
+      const apiUrl = "https://api.gencallsystem.com/api/v1/trigger-call";
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: "bb21c587-656b-421d-bc55-5754ddaf18ef",
+        // Add any other headers as needed
+      };
+      // Define the JSON object to be sent
+      const jsonData = {
+        projectId: "65ca647ffa9634f4b5387bf9",
+      };
+
+      document.getElementById("popup-overlay").style.display = "none";
+      document.getElementById("popup-container").style.display = "none";
+      // Function to open the popup
+      function openPopup() {
+        document.getElementById("popup-overlay").style.display = "block";
+        document.getElementById("popup-container").style.display = "block";
+
+        // Hide other chat boxes
+        document.querySelector(".chatbox1").style.display = "none";
+        document.querySelector(".chatbox3").style.display = "none";
+      }
+
+      // Function to close the popup
+      function closePopup() {
+        document.getElementById("popup-overlay").style.display = "none";
+        document.getElementById("popup-container").style.display = "none";
+
+        // Show other chat boxes
+        document.querySelector(".chatbox1").style.display = "none";
+        document.querySelector(".chatbox3").style.display = "block";
+      }
+
+      // Event listener for the open popup button
+      document
+        .getElementById("open-popup")
+        .addEventListener("click", openPopup);
+
+      // Event listener for the close popup button
+      document
+        .getElementById("popup-overlay")
+        .addEventListener("click", closePopup);
+
+      // Prevent clicks within the popup from closing it
+      document
+        .getElementById("popup-container")
+        .addEventListener("click", function (event) {
+          event.stopPropagation();
+        });
+
+      // Event listener for the form submission
+      document
+        .getElementById("popup-form")
+        .addEventListener("submit", function (event) {
+          const phone = document.getElementById("phone").value;
+
+          // Define an array of JSON objects to be sent
+          const jsonArrayData = [
+            {
+              phone: phone,
+              // Add more key-value pairs as needed
+            },
+          ];
+          // Define the request body
+          const requestBody = {
+            projectId: "65ca647ffa9634f4b5387bf9",
+            callList: jsonArrayData,
+          };
+
+          // Define the fetch options
+          const options = {
+            method: "POST", // Or 'PUT', 'DELETE', etc. depending on the API endpoint
+            headers: headers,
+            body: JSON.stringify(requestBody), // Convert JSON to string
+          };
+          fetch(apiUrl, options)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Network response was not ok");
+              }
+              return response.json(); // Parse the JSON response
+            })
+            .then((data) => {
+              // Process the JSON data returned by the API
+              console.log(data);
+
+              // Update step 3 to show "We are Calling!"
+              document.getElementById("step3").textContent = "We are Calling!";
+            })
+            .catch((error) => {
+              // Handle errors
+              console.error(
+                "There was a problem with the fetch operation:",
+                error
+              );
+            });
+          // Prevent the default form submission
+          event.preventDefault();
+
+          // Perform any form submission logic here (e.g., AJAX request)
+          // For demonstration purposes, we'll just close the popup
+          closePopup();
+        });
+    </script>
+
+    <script>
+      // toggle callbot
+      const callbotToggler = document.querySelector(".callbot-toggler");
+      const closeBtn = document.querySelector(".close-btn");
+      const callbot = document.querySelector(".callbot");
+
+      closeBtn.addEventListener("click", () => {
+        document.body.classList.remove("show-callbot");
+      });
+
+      callbotToggler.addEventListener("click", () => {
+        document.body.classList.toggle("show-callbot");
+      });
+
+      const step1 = document.getElementById("step1");
+      const step2 = document.getElementById("step2");
+      const step3 = document.getElementById("step3");
+      const openPopupBtn = document.getElementById("open-popup");
+      const callMeBtn = document.getElementById("call-now");
+
+      openPopupBtn.addEventListener("click", function () {
+        step1.style.display = "none";
+        step2.style.display = "block";
+        step3.style.display = "block"; // Hide step3 when step1 is displayed
+      });
+
+      callMeBtn.addEventListener("click", function () {
+        step2.style.display = "none";
+        step3.style.display = "block";
+        step1.style.display = "none"; // Hide step1 when step3 is displayed
+      });
+
+      // show more/ show less footer option
+      document.addEventListener("DOMContentLoaded", function () {
+        const toggleLink = document.getElementById("toggle-show-more-less");
+        const moreText = document.getElementById("show-more");
+
+        toggleLink.addEventListener("click", function (event) {
+          event.preventDefault();
+          if (moreText.style.display === "none") {
+            moreText.style.display = "inline"; // Show more text
+            toggleLink.textContent = "Show Less";
+          } else {
+            moreText.style.display = "none"; // Hide more text
+            toggleLink.textContent = "Show More";
+          }
+        });
+      });
+
+      // Select the talk with me button
+      const talkWithMeBtn = document.querySelector(".talk-with-me-btn");
+
+      // Function to toggle the callbot
+      function toggleCallbot() {
+        document.body.classList.toggle("show-callbot");
+      }
+
+      // Add event listener to the talk with me button
+      talkWithMeBtn.addEventListener("click", toggleCallbot);
+    </script>
+  </body>
+</html>
